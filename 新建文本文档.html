@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神秘链接</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif;}
+        body{
+            min-height:100vh;
+            background:#0b2447;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+            overflow:hidden;
+        }
+        .box{
+            background:rgba(255,255,255,0.95);
+            border-radius:20px;
+            padding:30px;
+            max-width:520px;
+            width:100%;
+            text-align:center;
+            position:relative;
+            z-index:2;
+        }
+        .title{
+            font-size:20px;
+            color:#0b2447;
+            margin-bottom:25px;
+            line-height:1.7;
+        }
+        .btn{
+            display:block;
+            width:100%;
+            padding:14px;
+            margin:10px 0;
+            border:none;
+            border-radius:12px;
+            background:#2c7da0;
+            color:white;
+            font-size:17px;
+            cursor:pointer;
+        }
+        .tip{
+            margin:15px 0;
+            color:#a02c2c;
+            font-weight:bold;
+            font-size:15px;
+        }
+        canvas#fireworks{
+            position:fixed;
+            top:0;left:0;
+            width:100%;height:100%;
+            pointer-events:none;
+            z-index:1;
+            display:none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    <div class="box" id="gameBox">
+        <div class="title" id="title"></div>
+        <div id="btnGroup"></div>
+        <div class="tip" id="tip"></div>
+    </div>
+
+    <script>
+        const data = [
+            {
+                q: `第一题：哦，你醒了，肚子饿了吧？现在你面前有一杯QQneinei好喝到咩噗茶，和一杯宝子哥主理人猫屎咖啡，请选择：`,
+                options: [
+                    {text: "A：QQneinei好喝到咩噗茶", next: 1},
+                    {text: "B：宝子哥主理人猫屎咖啡", tip: "咪的天，口味真重啊，喝完这杯还有一杯", next: 1}
+                ]
+            },
+            {
+                q: `第二题：好了，补充完能量你可以上路了，现在你站在分岔路口，请选择：`,
+                options: [
+                    {text: "A. 左边", next: 2},
+                    {text: "B. 右边", next: 2}
+                ]
+            },
+            {
+                q: `第三题：走着走着，你在路上遇到了一个熟悉的身影：身形高大强壮，双臂有力，步履稳健，身躯壮硕得好像一堵墙似的，身躯凛凛，相貌堂堂，肩膀好似双开门冰箱，一双眼光射寒星，两弯眉浑如刷漆，如同天上降魔主真是人间太岁神，好一个能让金丝雀依偎的宽大肩膀。ta是：`,
+                options: [
+                    {text: "A.吴彦祖", tip: "哪来的吴彦祖？", next: 3},
+                    {text: "B.肖韵晨", next: 3}
+                ]
+            },
+            {
+                q: `第四题：你和肖韵晨一起上路，你们走着走着，突然意识到是不是忘记了什么东西？`,
+                options: [
+                    {text: "A. 黄雯在哪里？", next: 4},
+                    {text: "B. 黄雯在哪里？", next: 4}
+                ]
+            },
+            {
+                q: `第五题：黄雯出现了，有缘千里来相会无缘对面手难牵，十年修得同船渡，百年修得共枕眠，所爱隔山海，山海皆可平，总之不要在意她是怎么出现的，总之现在你们三个人正在路上走，迎面走来一名流浪商人，他给了你一个盲盒：`,
+                options: [
+                    {text: "A. 拆开", next: 5},
+                    {text: "B. 还给他", tip: "免费的不要白不要", next: 5}
+                ]
+            },
+            {
+                q: `第六题：拆开后，竟然是一枚可爱的小饼干！你抱着小饼干，和黄雯肖韵晨走到了一扇门前：`,
+                options: [
+                    {text: "A. 公主请进", next: 6}
+                ]
+            },
+            {
+                q: `第七题：亲爱的孙雅鸿女士，诚挚邀请您于2026年5月30日12时前往遇礼西餐厅(特房店)庆祝您的29岁寿诞！让两个女人与您度过年纪2开头的最后一个生日，KISSKISS！`,
+                options: [],
+                end: true
+            }
+        ];
+
+        let current = 0;
+        const titleEl = document.getElementById("title");
+        const btnGroupEl = document.getElementById("btnGroup");
+        const tipEl = document.getElementById("tip");
+        const canvas = document.getElementById("fireworks");
+        const ctx = canvas.getContext("2d");
+
+        // 烟花代码
+        let w, h, particles = [];
+        function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
+        window.addEventListener("resize",resize);resize();
+        function random(a,b){return Math.random()*(b-a)+a;}
+        class P{
+            constructor(x,y){
+                this.x=x;this.y=y;
+                this.s=random(2,6);this.a=random(0,Math.PI*2);
+                this.al=1;this.d=random(0.005,0.01);
+                this.c=`hsl(${random(0,360)},100%,60%)`;
+                this.r=random(1,3);
+            }
+            update(){this.x+=Math.cos(this.a)*this.s;this.y+=Math.sin(this.a)*this.s;this.al-=this.d;}
+            draw(){
+                ctx.save();ctx.globalAlpha=this.al;ctx.fillStyle=this.c;
+                ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();ctx.restore();
+            }
+        }
+        function fire(){
+            let x=random(w*0.1,w*0.9),y=random(h*0.1,h*0.5);
+            for(let i=0;i<120;i++) particles.push(new P(x,y));
+        }
+        function loop(){
+            ctx.fillStyle="rgba(11,36,71,0.2)";ctx.fillRect(0,0,w,h);
+            particles=particles.filter(p=>p.al>0);
+            particles.forEach(p=>{p.update();p.draw();});
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        function render(){
+            let p=data[current];
+            titleEl.textContent=p.q;
+            btnGroupEl.innerHTML="";tipEl.textContent="";
+            if(p.end){
+                tipEl.textContent="🎉 生日快乐！";
+                canvas.style.display="block";
+                setInterval(fire,800);
+                return;
+            }
+            p.options.forEach(opt=>{
+                let btn=document.createElement("button");
+                btn.className="btn";btn.textContent=opt.text;
+                btn.onclick=()=>{
+                    if(opt.tip) tipEl.textContent=opt.tip;
+                    setTimeout(()=>{current=opt.next;render();},800);
+                };
+                btnGroupEl.appendChild(btn);
+            });
+        }
+        render();
+    </script>
+</body>
+</html>
