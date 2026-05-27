@@ -8,7 +8,7 @@
         *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif;}
         body{
             min-height:100vh;
-            background:#0b2447;
+            background:#e6f4ff;
             display:flex;
             justify-content:center;
             align-items:center;
@@ -16,7 +16,7 @@
             overflow:hidden;
         }
         .box{
-            background:rgba(255,255,255,0.95);
+            background:#ffffff;
             border-radius:20px;
             padding:30px;
             max-width:520px;
@@ -24,10 +24,20 @@
             text-align:center;
             position:relative;
             z-index:2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .q-img{
+            width:100%;
+            max-height:280px;
+            object-fit:contain;
+            border-radius:12px;
+            margin-bottom:20px;
+            display:block;
+            background:#f5f9ff;
         }
         .title{
             font-size:20px;
-            color:#0b2447;
+            color:#2d3748;
             margin-bottom:25px;
             line-height:1.7;
         }
@@ -38,14 +48,18 @@
             margin:10px 0;
             border:none;
             border-radius:12px;
-            background:#2c7da0;
-            color:white;
+            background:#b3d9ff;
+            color:#2d3748;
             font-size:17px;
             cursor:pointer;
+            transition: 0.2s;
+        }
+        .btn:hover{
+            background:#99ccff;
         }
         .tip{
             margin:15px 0;
-            color:#a02c2c;
+            color:#cc5555;
             font-weight:bold;
             font-size:15px;
         }
@@ -62,6 +76,7 @@
 <body>
     <canvas id="fireworks"></canvas>
     <div class="box" id="gameBox">
+        <img class="q-img" id="qImg" src="" alt="题目配图">
         <div class="title" id="title"></div>
         <div id="btnGroup"></div>
         <div class="tip" id="tip"></div>
@@ -70,72 +85,82 @@
     <script>
         const data = [
             {
-                q: `第一题：哦，你醒了，肚子饿了吧？现在你面前有一杯QQneinei好喝到咩噗茶，和一杯宝子哥主理人猫屎咖啡，请选择：`,
+                q: `哦，你醒了，肚子饿了吧？现在你面前有一杯QQneinei好喝到咩噗茶，和一杯宝子哥主理人猫屎咖啡，请选择：`,
+                img: "images/q1.jpg",
                 options: [
                     {text: "A：QQneinei好喝到咩噗茶", next: 1},
-                    {text: "B：宝子哥主理人猫屎咖啡", tip: "咪的天，口味真重啊，喝完这杯还有一杯", next: 1}
+                    {text: "B：宝子哥主理人猫屎咖啡", tip: "咪的天，口味真重啊，喝完这杯还有一杯", next: 1, btnText: "还是喝QQneinei好喝到咩噗茶吧"}
                 ]
             },
             {
-                q: `第二题：好了，补充完能量你可以上路了，现在你站在分岔路口，请选择：`,
+                q: `好了，补充完能量你可以上路了，现在你站在分岔路口，请选择：`,
+                img: "images/q2.jpg",
                 options: [
                     {text: "A. 左边", next: 2},
                     {text: "B. 右边", next: 2}
                 ]
             },
             {
-                q: `第三题：走着走着，你在路上遇到了一个熟悉的身影：身形高大强壮，双臂有力，步履稳健，身躯壮硕得好像一堵墙似的，身躯凛凛，相貌堂堂，肩膀好似双开门冰箱，一双眼光射寒星，两弯眉浑如刷漆，如同天上降魔主真是人间太岁神，好一个能让金丝雀依偎的宽大肩膀。ta是：`,
+                q: `走着走着，你在路上遇到了一个熟悉的身影：身形高大强壮，双臂有力，步履稳健，身躯壮硕得好像一堵墙似的，身躯凛凛，相貌堂堂，肩膀好似双开门冰箱，一双眼光射寒星，两弯眉浑如刷漆，如同天上降魔主真是人间太岁神，好一个能让金丝雀依偎的宽大肩膀。ta是：`,
+                img: "images/q3.jpg",
                 options: [
-                    {text: "A.吴彦祖", tip: "哪来的吴彦祖？", next: 3},
+                    {text: "A.吴彦祖", tip: "哪来的吴彦祖？", next: 3, btnText: "肖韵晨在天上失禁地看着你"},
                     {text: "B.肖韵晨", next: 3}
                 ]
             },
             {
-                q: `第四题：你和肖韵晨一起上路，你们走着走着，突然意识到是不是忘记了什么东西？`,
+                q: `你和肖韵晨一起上路，突然意识到是不是忘记了什么东西？`,
+                img: "images/q4.jpg",
                 options: [
                     {text: "A. 黄雯在哪里？", next: 4},
                     {text: "B. 黄雯在哪里？", next: 4}
                 ]
             },
             {
-                q: `第五题：黄雯出现了，有缘千里来相会无缘对面手难牵，十年修得同船渡，百年修得共枕眠，所爱隔山海，山海皆可平，总之不要在意她是怎么出现的，总之现在你们三个人正在路上走，迎面走来一名流浪商人，他给了你一个盲盒：`,
+                q: `黄雯出现了，有缘千里来相会无缘对面手难牵，十年修得同船渡，百年修得共枕眠，所爱隔山海，山海皆可平，总之不要在意她是怎么出现的，总之现在你们三个人正在路上走，迎面走来一名流浪商人，他给了你一个盲盒：`,
+                img: "images/q5.jpg",
                 options: [
                     {text: "A. 拆开", next: 5},
-                    {text: "B. 还给他", tip: "免费的不要白不要", next: 5}
+                    {text: "B. 还给他", tip: "免费的不要白不要", next: 5, btnText: "免费的不要白不要"}
                 ]
             },
             {
-                q: `第六题：拆开后，竟然是一枚可爱的小饼干！你抱着小饼干，和黄雯肖韵晨走到了一扇门前：`,
+                q: `拆开后，竟然是一枚可爱的小饼干！你抱着小饼干，和黄雯肖韵晨走到了一扇门前：`,
+                img: "images/q6.jpg",
                 options: [
                     {text: "A. 公主请进", next: 6}
                 ]
             },
             {
-                q: `第七题：亲爱的孙雅鸿女士，诚挚邀请您于2026年5月30日12时前往遇礼西餐厅(特房店)庆祝您的29岁寿诞！让两个女人与您度过年纪2开头的最后一个生日，KISSKISS！`,
+                q: `亲爱的孙雅鸿女士，诚挚邀请您于2026年5月30日12时前往遇礼西餐厅(特房店)庆祝您的29岁寿诞！让两个女人与您度过年纪2开头的最后一个生日，KISSKISS！`,
+                img: "images/q7.jpg",
                 options: [],
                 end: true
             }
         ];
 
         let current = 0;
+        let nextPage = 0;
+
         const titleEl = document.getElementById("title");
         const btnGroupEl = document.getElementById("btnGroup");
         const tipEl = document.getElementById("tip");
+        const qImg = document.getElementById("qImg");
         const canvas = document.getElementById("fireworks");
         const ctx = canvas.getContext("2d");
 
-        // 烟花代码
         let w, h, particles = [];
         function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
         window.addEventListener("resize",resize);resize();
         function random(a,b){return Math.random()*(b-a)+a;}
+        const colors = ['#cce7ff','#d4f1ff','#e0eaff','#f0e8ff','#f8f2ff'];
         class P{
             constructor(x,y){
                 this.x=x;this.y=y;
-                this.s=random(2,6);this.a=random(0,Math.PI*2);
-                this.al=1;this.d=random(0.005,0.01);
-                this.c=`hsl(${random(0,360)},100%,60%)`;
-                this.r=random(1,3);
+                this.s=random(2,4);this.a=random(0,Math.PI*2);
+                this.al=1;this.d=random(0.003,0.006);
+                this.c=colors[Math.floor(random(0,colors.length))];
+                this.r=random(1.2,2.5);
             }
             update(){this.x+=Math.cos(this.a)*this.s;this.y+=Math.sin(this.a)*this.s;this.al-=this.d;}
             draw(){
@@ -144,11 +169,12 @@
             }
         }
         function fire(){
-            let x=random(w*0.1,w*0.9),y=random(h*0.1,h*0.5);
+            let x=random(w*0.2,w*0.8),y=random(h*0.2,h*0.5);
             for(let i=0;i<120;i++) particles.push(new P(x,y));
         }
         function loop(){
-            ctx.fillStyle="rgba(11,36,71,0.2)";ctx.fillRect(0,0,w,h);
+            ctx.fillStyle="rgba(230,244,255,0.1)";
+            ctx.fillRect(0,0,w,h);
             particles=particles.filter(p=>p.al>0);
             particles.forEach(p=>{p.update();p.draw();});
             requestAnimationFrame(loop);
@@ -158,19 +184,36 @@
         function render(){
             let p=data[current];
             titleEl.textContent=p.q;
-            btnGroupEl.innerHTML="";tipEl.textContent="";
+            btnGroupEl.innerHTML="";
+            tipEl.textContent="";
+
+            qImg.src = p.img;
+
             if(p.end){
                 tipEl.textContent="🎉 生日快乐！";
                 canvas.style.display="block";
-                setInterval(fire,800);
+                setInterval(fire,750);
                 return;
             }
+
             p.options.forEach(opt=>{
                 let btn=document.createElement("button");
-                btn.className="btn";btn.textContent=opt.text;
+                btn.className="btn";
+                btn.textContent=opt.text;
                 btn.onclick=()=>{
-                    if(opt.tip) tipEl.textContent=opt.tip;
-                    setTimeout(()=>{current=opt.next;render();},800);
+                    if(opt.tip){
+                        tipEl.textContent = opt.tip;
+                        nextPage = opt.next;
+                        const text = opt.btnText || "👉 点击继续下一题";
+                        btnGroupEl.innerHTML = `<button class="btn" id="continueBtn">${text}</button>`;
+                        document.getElementById("continueBtn").onclick = () => {
+                            current = nextPage;
+                            render();
+                        };
+                    }else{
+                        current = opt.next;
+                        render();
+                    }
                 };
                 btnGroupEl.appendChild(btn);
             });
